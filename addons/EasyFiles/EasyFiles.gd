@@ -1,7 +1,59 @@
 extends Node
 
-var _dir := Directory.new()
+signal file_modified(path)
 
+var _dir := Directory.new() setget _not_setter # protected var
+var _test_file := File.new() setget _not_setter # protected var
+var _file_moinitor_timer := Timer.new() setget _not_setter # protected var
+
+func _not_setter(__):
+	pass
+
+func _ready():
+	# set up check file timer
+	add_child(_file_moinitor_timer)
+	_file_moinitor_timer.start(1)
+	_file_moinitor_timer.connect("timeout", self, "_test_file_modifications")
+
+## file modification checks
+var _files_to_monitor := [] setget _not_setter # protected var
+var _files_last_modified := [] setget _not_setter # protected var
+
+func add_file_modification_monitor(path:String)->int:
+	if _files_to_monitor.has(path): return ERR_ALREADY_EXISTS
+	# I don' know if relative paths will work but might as well allow them
+	if !(path.is_abs_path() or path.is_rel_path()): ERR_FILE_BAD_PATH
+	_files_to_monitor.push_back(path)
+	_files_last_modified.push_back(_test_file.get_modified_time(path))
+	return OK
+
+func remove_file_modification_monitor(path:String)->int:
+	if !_files_to_monitor.has(path): return ERR_DOES_NOT_EXIST
+	_files_last_modified.remove(_files_to_monitor.find(path))
+	_files_to_monitor.erase(path)
+	return OK
+
+func _test_file_modifications():
+	for idx in range(_files_to_monitor.size()):
+		var mod_time := _test_file.get_modified_time(_files_to_monitor[idx])
+		if mod_time == _files_last_modified[idx]: continue
+		emit_signal("file_modified", _files_to_monitor[idx])
+		_files_last_modified[idx] = mod_time
+
+func get_monitored_files()->Array:
+	return _files_to_monitor
+
+func set_file_monitor_intervall(time:float=1):
+	_file_moinitor_timer.start(time)
+
+func get_file_monitor_intervall()->float:
+	return _file_moinitor_timer.wait_time
+
+func pause_file_monitoring():
+	_file_moinitor_timer.paused = true
+
+func resume_file_monitoring():
+	_file_moinitor_timer.paused = false
 
 ## general Folder operations
 func copy_file(from:String, to:String)->int:

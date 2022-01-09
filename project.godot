@@ -12,7 +12,15 @@ config_version=4
 
 config/name="EasyFiles"
 run/main_scene="res://Example.tscn"
-config/icon="res://icon.png"
+config/icon="res://addons/EasyFiles/icon.png"
+
+[autoload]
+
+EasyFiles="*res://addons/EasyFiles/EasyFiles.gd"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/EasyFiles/plugin.cfg" )
 
 [physics]
 
