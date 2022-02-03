@@ -242,6 +242,7 @@ func write_bytes(path:String, value:PoolByteArray, key:="")->int:
 func get_files_in_directory(path:String, recursive=false, filter:="*"):
 	var found = []
 	var dirs = []
+	if !path.ends_with("/"): path += "/"
 	
 	var dir := Directory.new()
 	if dir.open(path) == OK:

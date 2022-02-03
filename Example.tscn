@@ -1,75 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://addons/EasyFiles/EasyFiles.gd" type="Script" id=1]
 [ext_resource path="res://addons/EasyFiles/icons/Reload.svg" type="Texture" id=2]
-
-[sub_resource type="GDScript" id=1]
-script/source = "extends MarginContainer
-
-onready var EF := $EasyFilesNode
-onready var _file_dialog := $FileDialog
-onready var _choose_file_btn := $HBox/ControlPanel/chooseFileBtn
-onready var _file_format := $HBox/ControlPanel/FileSpecific/fileFormatSelector/OptionButton
-onready var _file_only := $HBox/ControlPanel/FileSpecific
-onready var _folder_only := $HBox/ControlPanel/Folderspecific
-onready var _output := $HBox/RichTextLabel
-onready var _file_filter := $HBox/ControlPanel/Folderspecific/FileFilter/LineEdit
-#onready var 
-#onready var 
-#onready var 
-#onready var 
-#onready var 
-
-
-var current_path := \"\"
-
-
-func _ready():
-	_on_FileDialog_file_selected(\"res://addons/EasyFiles/test.txt\")
-	
-	var err = EasyFiles.connect(\"file_modified\", self, \"_file\")
-	if err != OK: print(\"EasyFilesExample error: \" + str(err))
-	
-	err = EasyFiles.add_file_monitor(\"res://addons/EasyFiles/test.txt\")
-	if err != OK: print(\"EasyFilesExample error: \" + str(err))
-
-func _file(path):
-	prints(\"modified:\", path)
-	OS.alert(str(\"This file was modified:\\n\", path), \"FILE MODIFIED!\")
-
-
-func _on_chooseFileBtn_pressed():
-	_file_dialog.popup_centered()
-	pass # Replace with function body.
-
-
-func _on_FileDialog_file_selected(path:String):
-	_folder_only.hide()
-	_file_only.show()
-	_choose_file_btn.text = \"Select File: \" + path.get_file()
-	update_control_panel()
-
-func _on_FileDialog_files_selected(paths):
-	_on_FileDialog_file_selected(paths[0])
-
-func _on_FileDialog_dir_selected(dir:String):
-	_file_only.hide()
-	_folder_only.show()
-	_choose_file_btn.text = \"Select dir: \" + dir.get_file()
-	current_path = dir
-	update_control_panel()
-
-func update_control_panel():
-	
-	if current_path.is_abs_path() or current_path.is_abs_path():
-		var out = \"\"
-		for path in EF.get_files_in_directory(current_path, false, _file_filter.text):
-			out+= path.trim_prefix(current_path) + \"\\n\"
-		
-		_output.text = out.trim_suffix(\"\\n\")
-		return
-	
-"
+[ext_resource path="res://Example.gd" type="Script" id=3]
+[ext_resource path="res://FileMonitorDisplay.tscn" type="PackedScene" id=4]
 
 [sub_resource type="GDScript" id=2]
 script/source = "extends LineEdit
@@ -84,7 +18,7 @@ func _on_clearBtn_pressed():
 [node name="Example" type="MarginContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = SubResource( 1 )
+script = ExtResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -92,7 +26,7 @@ __meta__ = {
 [node name="EasyFilesNode" type="Node" parent="."]
 script = ExtResource( 1 )
 
-[node name="HBox" type="HBoxContainer" parent="."]
+[node name="HBox" type="HSplitContainer" parent="."]
 margin_right = 1024.0
 margin_bottom = 600.0
 
@@ -104,10 +38,18 @@ margin_bottom = 600.0
 margin_right = 149.0
 margin_bottom = 20.0
 
-[node name="FileSpecific" type="VBoxContainer" parent="HBox/ControlPanel"]
+[node name="reloadbtn" type="Button" parent="HBox/ControlPanel"]
+margin_left = 97.0
 margin_top = 24.0
 margin_right = 149.0
-margin_bottom = 62.0
+margin_bottom = 44.0
+size_flags_horizontal = 8
+text = "reload"
+
+[node name="FileSpecific" type="VBoxContainer" parent="HBox/ControlPanel"]
+margin_top = 48.0
+margin_right = 149.0
+margin_bottom = 110.0
 
 [node name="Label" type="Label" parent="HBox/ControlPanel/FileSpecific"]
 margin_right = 149.0
@@ -133,10 +75,16 @@ text = "Auto"
 items = [ "Auto", null, false, 0, null, "Text", null, false, 1, null, "Json", null, false, 2, null, "Variable", null, false, 3, null, "Bytes", null, false, 4, null, "CSV (Not Implemented)", null, true, 5, null ]
 selected = 0
 
-[node name="Folderspecific" type="VBoxContainer" parent="HBox/ControlPanel"]
-margin_top = 66.0
+[node name="savebtn" type="Button" parent="HBox/ControlPanel/FileSpecific"]
+margin_top = 42.0
 margin_right = 149.0
-margin_bottom = 136.0
+margin_bottom = 62.0
+text = "Save"
+
+[node name="Folderspecific" type="VBoxContainer" parent="HBox/ControlPanel"]
+margin_top = 114.0
+margin_right = 149.0
+margin_bottom = 184.0
 
 [node name="Label" type="Label" parent="HBox/ControlPanel/Folderspecific"]
 margin_right = 149.0
@@ -176,20 +124,52 @@ margin_bottom = 24.0
 text = "*"
 script = SubResource( 2 )
 
-[node name="RichTextLabel" type="RichTextLabel" parent="HBox"]
-margin_left = 153.0
+[node name="FileMonitorDisplay" parent="HBox/ControlPanel" instance=ExtResource( 4 )]
+margin_bottom = 326.0
+file_dialog_path = NodePath("../../../FileDialog2")
+
+[node name="TabContainer" type="TabContainer" parent="HBox"]
+margin_left = 161.0
 margin_right = 1024.0
 margin_bottom = 600.0
-focus_mode = 2
 size_flags_horizontal = 3
-selection_enabled = true
+tab_align = 0
+
+[node name="Edit" type="TextEdit" parent="HBox/TabContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+size_flags_horizontal = 3
+show_line_numbers = true
+draw_tabs = true
+
+[node name="String" type="RichTextLabel" parent="HBox/TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+
+[node name="Bytes" type="RichTextLabel" parent="HBox/TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
 
 [node name="FileDialog" type="FileDialog" parent="."]
 margin_right = 355.0
 margin_bottom = 130.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
-window_title = "Open A file or Folder"
+window_title = "Open a File or Directory"
 resizable = true
 dialog_hide_on_ok = true
 mode = 3
@@ -198,7 +178,18 @@ show_hidden_files = true
 current_dir = "/devRepos/EasyFiles"
 current_path = "/devRepos/EasyFiles/"
 
+[node name="FileDialog2" type="FileDialog" parent="."]
+margin_right = 1024.0
+margin_bottom = 600.0
+rect_min_size = Vector2( 500, 300 )
+window_title = "Open a File"
+resizable = true
+mode = 0
+show_hidden_files = true
+
 [connection signal="pressed" from="HBox/ControlPanel/chooseFileBtn" to="." method="_on_chooseFileBtn_pressed"]
+[connection signal="pressed" from="HBox/ControlPanel/reloadbtn" to="." method="update_control_panel"]
+[connection signal="pressed" from="HBox/ControlPanel/FileSpecific/savebtn" to="." method="_on_savebtn_pressed"]
 [connection signal="pressed" from="HBox/ControlPanel/Folderspecific/FileFilter/clearBtn" to="HBox/ControlPanel/Folderspecific/FileFilter/LineEdit" method="_on_clearBtn_pressed"]
 [connection signal="dir_selected" from="FileDialog" to="." method="_on_FileDialog_dir_selected"]
 [connection signal="file_selected" from="FileDialog" to="." method="_on_FileDialog_file_selected"]

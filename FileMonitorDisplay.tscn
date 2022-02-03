@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://FileMonitorDisplay.gd" type="Script" id=1]
+[ext_resource path="res://addons/EasyFiles/icons/Add.svg" type="Texture" id=2]
+
+[node name="FileMonitorDisplay" type="PanelContainer"]
+margin_top = 188.0
+margin_right = 149.0
+margin_bottom = 202.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBox" type="VBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 142.0
+margin_bottom = 131.0
+
+[node name="HBox" type="HBoxContainer" parent="VBox"]
+margin_right = 135.0
+margin_bottom = 20.0
+
+[node name="toggl" type="Button" parent="VBox/HBox"]
+margin_right = 135.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+toggle_mode = true
+text = "open monitor"
+
+[node name="add" type="Button" parent="VBox/HBox"]
+visible = false
+margin_left = 107.0
+margin_right = 135.0
+margin_bottom = 22.0
+icon = ExtResource( 2 )
+
+[node name="Labels" type="RichTextLabel" parent="VBox"]
+margin_top = 24.0
+margin_right = 135.0
+margin_bottom = 124.0
+rect_min_size = Vector2( 0, 100 )
+
+[connection signal="toggled" from="VBox/HBox/toggl" to="." method="_on_toggl_toggled"]
+[connection signal="pressed" from="VBox/HBox/add" to="." method="_on_add_pressed"]
