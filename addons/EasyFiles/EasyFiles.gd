@@ -96,11 +96,11 @@ func path_exists(path:String)->bool:
 
 ## json
 #######
-func read_json(path:String, key:=""):
-	return parse_json(read_text(path, key))
+func read_json(path:String, key:="", compression=-1):
+	return parse_json(read_text(path, key, compression))
 
-func write_json(path:String, data, key:="")->int:
-	return write_text(path, to_json(data), key)
+func write_json(path:String, data, key:="", compression=-1)->int:
+	return write_text(path, to_json(data), key, compression)
 ###########################################
 
 
