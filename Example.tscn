@@ -72,7 +72,7 @@ margin_left = 84.0
 margin_right = 143.0
 margin_bottom = 20.0
 text = "Auto"
-items = [ "Auto", null, false, 0, null, "Text", null, false, 1, null, "Json", null, false, 2, null, "Variable", null, false, 3, null, "Bytes", null, false, 4, null, "CSV (Not Implemented)", null, true, 5, null ]
+items = [ "Auto", null, false, 0, null, "Text", null, false, 1, null, "Json", null, false, 2, null, "Variable", null, false, 3, null, "Bytes", null, false, 4, null, "CSV", null, false, 5, null ]
 selected = 0
 
 [node name="savebtn" type="Button" parent="HBox/ControlPanel/FileSpecific"]

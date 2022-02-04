@@ -26,7 +26,7 @@ const AUTO_FILEFORMAT_LOOKUP := {
 	"variable" : 3,
 	"save" : 3,
 	"bin" : 4,
-	"csv" : 1,#5,
+	"csv" : 5,
 }
 
 var current_path := ""
@@ -77,7 +77,6 @@ func update_control_panel():
 	
 	
 	# if it is a folder
-	
 	if current_path.get_extension() == "" or current_path.ends_with("/"):
 		var recursive : bool = _search_recursive_btn.pressed
 		var files : Array = EF.get_files_in_directory(current_path, recursive, _file_filter.text)
@@ -108,13 +107,30 @@ func update_control_panel():
 			_out_string.text = data
 			_out_bin.text = _text_to_bytes(data).hex_encode()
 		2: # json
-			_out_edit.text = str(EF.read_json(current_path))
+			var data = EF.read_json(current_path)
+			_out_edit.text = str(data)
+			_out_string.text = str(data)
+			_out_bin.text = var2bytes(data).hex_encode()
 		3: # var
-			_out_edit.text = var2str(EF.read_variant(current_path))
+			var data = var2str(EF.read_variant(current_path))
+			_out_edit.text = data
+			_out_string.text = data
+			_out_bin.text = var2bytes(data).hex_encode()
 		4: # bin
-			_out_edit.text = EF.read_bytes(current_path).hex_encode()
+			var data = EF.read_bytes(current_path)
+			_out_edit.text = data.hex_encode()
+			_out_string.text = data.get_string_from_utf8()
+			_out_bin.text = data.hex_encode()
 		5: # csv
-			pass
+			var data = EF.read_csv(current_path)
+			var string := ""
+			for line in data:
+				for part in line:
+					string+= part+", "
+				string += "\n"
+			_out_edit.text = string
+			_out_string.text = str(data)
+			_out_bin.text = var2bytes(data).hex_encode()
 	
 	
 
@@ -135,7 +151,15 @@ func _on_savebtn_pressed():
 		4: # bin
 			EF.write_bytes(current_path, _text_to_bytes(_out_edit.text))
 		5: # csv
-			pass
+			var data := []
+			for line in _out_edit.text.split("\n"):
+				var l : Array = line.split(",")
+				if l.size() > 0:
+					data.push_back(l)
+				else:
+					data.push_back([""])
+				
+			EF.write_csv(current_path, data)
 	
 	update_control_panel()
 

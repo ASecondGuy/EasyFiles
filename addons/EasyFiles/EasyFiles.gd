@@ -106,13 +106,10 @@ func write_json(path:String, data, key:="")->int:
 
 ## text
 #######
-func read_text(path:String, key:="")->String:
+func read_text(path:String, key:="", compression=-1)->String:
 	var data := ""
 	var err : int
-	if key == "":
-		err = _test_file.open(path, _test_file.READ)
-	else:
-		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
+	err = _open_read(path, key, compression)
 	
 	if err==OK:
 		data = _test_file.get_as_text()
@@ -123,12 +120,9 @@ func read_text(path:String, key:="")->String:
 	return data
 
 
-func write_text(path:String, text:String, key:="")->int:
+func write_text(path:String, text:String, key:="", compression=-1)->int:
 	var err : int
-	if key == "":
-		err = _test_file.open(path, _test_file.WRITE)
-	else:
-		err = _test_file.open_encrypted_with_pass(path, _test_file.WRITE, key)
+	err = _open_write(path, key, compression)
 	
 	if err==OK:
 		_test_file.store_string(text)
@@ -142,13 +136,10 @@ func write_text(path:String, text:String, key:="")->int:
 
 ## Any Variable
 ###############
-func read_variant(path:String, key:=""):
-	var data := ""
+func read_variant(path:String, key:="", compression=-1):
+	var data
 	var err : int
-	if key == "":
-		err = _test_file.open(path, _test_file.READ)
-	else:
-		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
+	err = _open_read(path, key, compression)
 	
 	if err==OK:
 		data = _test_file.get_var(true)
@@ -159,12 +150,9 @@ func read_variant(path:String, key:=""):
 	return data
 
 
-func write_variant(path:String, value, key:="")->int:
+func write_variant(path:String, value, key:="", compression=-1)->int:
 	var err : int
-	if key == "":
-		err = _test_file.open(path, _test_file.WRITE)
-	else:
-		err = _test_file.open_encrypted_with_pass(path, _test_file.WRITE, key)
+	err = _open_write(path, key, compression)
 	
 	if err==OK:
 		_test_file.store_var(value, true)
@@ -178,13 +166,10 @@ func write_variant(path:String, value, key:="")->int:
 
 ## Binary
 #########
-func read_bytes(path:String, key:="")->PoolByteArray:
+func read_bytes(path:String, key:="", compression=-1)->PoolByteArray:
 	var data := PoolByteArray([])
 	var err : int
-	if key == "":
-		err = _test_file.open(path, _test_file.READ)
-	else:
-		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
+	err = _open_read(path, key, compression)
 	
 	if err==OK:
 		data = _test_file.get_buffer(_test_file.get_len())
@@ -195,12 +180,10 @@ func read_bytes(path:String, key:="")->PoolByteArray:
 	return data
 
 
-func write_bytes(path:String, value:PoolByteArray, key:="")->int:
+func write_bytes(path:String, value:PoolByteArray, key:="", compression:=-1)->int:
 	var err : int
-	if key == "":
-		err = _test_file.open(path, _test_file.WRITE)
-	else:
-		err = _test_file.open_encrypted_with_pass(path, _test_file.WRITE, key)
+	
+	err = _open_write(path, key, compression)
 	
 	if err==OK:
 		_test_file.store_buffer(value)
@@ -214,13 +197,10 @@ func write_bytes(path:String, value:PoolByteArray, key:="")->int:
 
 ## CSV
 ######
-func read_csv(path:String, key:="", custom_delimiter=",")->Array:
+func read_csv(path:String, key:="", custom_delimiter=",", compression=-1)->Array:
 	var data := []
 	var err : int
-	if key == "":
-		err = _test_file.open(path, _test_file.READ)
-	else:
-		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
+	err = _open_read(path, key, compression)
 	
 	if err==OK:
 		while _test_file.get_len() > _test_file.get_position():
@@ -232,20 +212,24 @@ func read_csv(path:String, key:="", custom_delimiter=",")->Array:
 	return data
 
 
-func write_csv(path:String, value:Array, key:="", custom_delimiter=",")->int:
+func write_csv(path:String, value:Array, custom_delimiter=",", key:="", compression=-1)->int:
 	var err : int
 	
 	# validate value
 	if !value is Array: return ERR_INVALID_DATA
+	for i in range(value.size()):
+		if value[i] is PoolStringArray: continue
+		if value[i] is Array:
+			value[i] = PoolStringArray(value[i])
+			continue
+		value[i] = PoolStringArray()
 	
-	if key == "":
-		err = _test_file.open(path, _test_file.READ)
-	else:
-		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
+	err = _open_write(path, key, compression)
 	
 	if err==OK:
 		for line in value:
-			_test_file.store_csv_line(PoolStringArray(line), custom_delimiter)
+			_test_file.store_csv_line(line, custom_delimiter)
+			_test_file.flush()
 	else:
 		prints("Couldn't write", path, "ErrorCode:", err)
 	
@@ -287,5 +271,29 @@ func get_files_in_directory(path:String, recursive=false, filter:="*"):
 	return found
 ###########################################
 
+
+## Helper Functions
+
+func _open_read(path:String, key="", compression=-1)->int:
+	if _test_file.is_open(): return ERR_BUSY
+	if key != "":
+		return _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
+	elif compression != -1:
+		if compression < 0 or compression > 3: return ERR_INVALID_PARAMETER
+		return _test_file.open_compressed(path, _test_file.READ, compression)
+	else:
+		return _test_file.open(path, _test_file.READ)
+
+
+func _open_write(path:String, key="", compression=-1)->int:
+	if _test_file.is_open(): return ERR_BUSY
+	if key != "":
+		return _test_file.open_encrypted_with_pass(path, _test_file.WRITE, key)
+	elif compression != -1:
+		if compression < 0 or compression > 3: return ERR_INVALID_PARAMETER
+		return _test_file.open_compressed(path, _test_file.WRITE, compression)
+	else:
+		return _test_file.open(path, _test_file.WRITE)
+###########################################
 
 
