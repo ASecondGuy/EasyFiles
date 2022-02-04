@@ -12,7 +12,7 @@ onready var _out_bin := $HBox/TabContainer/Bytes
 onready var _file_filter := $HBox/ControlPanel/Folderspecific/FileFilter/LineEdit
 onready var _file_monitor := $HBox/ControlPanel/FileMonitorDisplay
 onready var _search_recursive_btn := $HBox/ControlPanel/Folderspecific/CheckBox
-#onready var 
+onready var _file_add_monitor_btn := $HBox/ControlPanel/FileSpecific/monitorbtn
 #onready var 
 #onready var 
 
@@ -46,12 +46,12 @@ func _ready():
 
 func _file(path):
 	prints("modified:", path)
-	OS.alert(str("This file was modified:\n", path), "FILE MODIFIED!")
+	if !_file_monitor.is_muted():
+		OS.alert(str("This file was modified:\n", path), "FILE MODIFIED!")
 
 
 func _on_chooseFileBtn_pressed():
-	_file_dialog.popup_centered()
-	pass # Replace with function body.
+	_file_dialog.popup_centered(OS.window_size*Vector2(.8, .7))
 
 
 func _on_FileDialog_file_selected(path:String):
@@ -80,7 +80,7 @@ func update_control_panel():
 	
 	if current_path.get_extension() == "" or current_path.ends_with("/"):
 		var recursive : bool = _search_recursive_btn.pressed
-		var files : Array = EF.get_files_in_directory(current_path, recursive)
+		var files : Array = EF.get_files_in_directory(current_path, recursive, _file_filter.text)
 		var out = "Found %s files in %s" % [files.size(), current_path.split("/")[-1]]
 		if recursive:
 			out += " and subdirectories"
@@ -94,6 +94,8 @@ func update_control_panel():
 		return
 	
 	# if it is a file
+	
+	_file_add_monitor_btn.text = ["Add to monitor", "Remove from monitor"][int(EF.get_monitored_files().has(current_path))]
 	
 	var mode : int = _file_format.selected
 	if mode == 0:
@@ -146,3 +148,11 @@ func _text_to_bytes(text:String)->PoolByteArray:
 	return PoolByteArray(data)
 
 
+
+
+
+
+func _on_monitorbtn_pressed():
+	if EF.add_file_monitor(current_path) == ERR_ALREADY_EXISTS:
+		EF.remove_file_monitor(current_path)
+	update_control_panel()

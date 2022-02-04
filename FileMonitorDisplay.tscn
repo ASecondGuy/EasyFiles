@@ -16,7 +16,7 @@ __meta__ = {
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 142.0
-margin_bottom = 131.0
+margin_bottom = 159.0
 
 [node name="HBox" type="HBoxContainer" parent="VBox"]
 margin_right = 135.0
@@ -36,10 +36,16 @@ margin_right = 135.0
 margin_bottom = 22.0
 icon = ExtResource( 2 )
 
-[node name="Labels" type="RichTextLabel" parent="VBox"]
+[node name="mutebtn" type="CheckBox" parent="VBox"]
 margin_top = 24.0
 margin_right = 135.0
-margin_bottom = 124.0
+margin_bottom = 48.0
+text = "mute"
+
+[node name="Labels" type="RichTextLabel" parent="VBox"]
+margin_top = 52.0
+margin_right = 135.0
+margin_bottom = 152.0
 rect_min_size = Vector2( 0, 100 )
 
 [connection signal="toggled" from="VBox/HBox/toggl" to="." method="_on_toggl_toggled"]

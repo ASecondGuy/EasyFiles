@@ -49,7 +49,7 @@ text = "reload"
 [node name="FileSpecific" type="VBoxContainer" parent="HBox/ControlPanel"]
 margin_top = 48.0
 margin_right = 149.0
-margin_bottom = 110.0
+margin_bottom = 134.0
 
 [node name="Label" type="Label" parent="HBox/ControlPanel/FileSpecific"]
 margin_right = 149.0
@@ -81,10 +81,16 @@ margin_right = 149.0
 margin_bottom = 62.0
 text = "Save"
 
-[node name="Folderspecific" type="VBoxContainer" parent="HBox/ControlPanel"]
-margin_top = 114.0
+[node name="monitorbtn" type="Button" parent="HBox/ControlPanel/FileSpecific"]
+margin_top = 66.0
 margin_right = 149.0
-margin_bottom = 184.0
+margin_bottom = 86.0
+text = "Add to file monitor"
+
+[node name="Folderspecific" type="VBoxContainer" parent="HBox/ControlPanel"]
+margin_top = 138.0
+margin_right = 149.0
+margin_bottom = 208.0
 
 [node name="Label" type="Label" parent="HBox/ControlPanel/Folderspecific"]
 margin_right = 149.0
@@ -125,7 +131,8 @@ text = "*"
 script = SubResource( 2 )
 
 [node name="FileMonitorDisplay" parent="HBox/ControlPanel" instance=ExtResource( 4 )]
-margin_bottom = 326.0
+margin_top = 212.0
+margin_bottom = 378.0
 file_dialog_path = NodePath("../../../FileDialog2")
 
 [node name="TabContainer" type="TabContainer" parent="HBox"]
@@ -190,6 +197,7 @@ show_hidden_files = true
 [connection signal="pressed" from="HBox/ControlPanel/chooseFileBtn" to="." method="_on_chooseFileBtn_pressed"]
 [connection signal="pressed" from="HBox/ControlPanel/reloadbtn" to="." method="update_control_panel"]
 [connection signal="pressed" from="HBox/ControlPanel/FileSpecific/savebtn" to="." method="_on_savebtn_pressed"]
+[connection signal="pressed" from="HBox/ControlPanel/FileSpecific/monitorbtn" to="." method="_on_monitorbtn_pressed"]
 [connection signal="pressed" from="HBox/ControlPanel/Folderspecific/FileFilter/clearBtn" to="HBox/ControlPanel/Folderspecific/FileFilter/LineEdit" method="_on_clearBtn_pressed"]
 [connection signal="dir_selected" from="FileDialog" to="." method="_on_FileDialog_dir_selected"]
 [connection signal="file_selected" from="FileDialog" to="." method="_on_FileDialog_file_selected"]

@@ -2,6 +2,9 @@ extends PanelContainer
 
 onready var _toggl_btn := $VBox/HBox/toggl
 onready var _labels := $VBox/Labels
+onready var _mutebtn := $VBox/mutebtn
+
+onready var _hide_nodes_list := [_labels, $VBox/HBox/add, _mutebtn]
 
 
 var EFNode := EasyFiles
@@ -9,7 +12,6 @@ var EFNode := EasyFiles
 export var file_dialog_path : NodePath
 var file_dialog
 
-onready var _hide_nodes_list := [_labels, $VBox/HBox/add]
 
 func _ready():
 	file_dialog = get_node(file_dialog_path)
@@ -44,4 +46,9 @@ func _on_toggl_toggled(button_pressed):
 
 func _on_add_pressed():
 	if is_instance_valid(file_dialog):
-		file_dialog.popup_centered()
+		file_dialog.popup_centered(OS.window_size*Vector2(.8, .7))
+
+func is_muted():
+	return _mutebtn.pressed
+
+
