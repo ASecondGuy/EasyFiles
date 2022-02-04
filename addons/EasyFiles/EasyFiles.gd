@@ -22,7 +22,7 @@ func _ready():
 	# set up check file timer
 	add_child(_file_moinitor_timer)
 	_file_moinitor_timer.start(1)
-	_file_moinitor_timer.connect("timeout", self, "_test_file_modifications")
+	_file_moinitor_timer.connect("timeout", self, "force_file_modification_check")
 
 
 
@@ -44,7 +44,7 @@ func remove_file_monitor(path:String)->int:
 	return OK
 
 
-func _test_file_modifications()->void:
+func force_file_modification_check()->void:
 	for idx in range(_files_to_monitor.size()):
 		var mod_time := _test_file.get_modified_time(_files_to_monitor[idx])
 		if mod_time == _files_last_modified[idx]: continue
@@ -107,36 +107,35 @@ func write_json(path:String, data, key:="")->int:
 ## text
 #######
 func read_text(path:String, key:="")->String:
-	var f := File.new()
 	var data := ""
 	var err : int
 	if key == "":
-		err = f.open(path, f.READ)
+		err = _test_file.open(path, _test_file.READ)
 	else:
-		err = f.open_encrypted_with_pass(path, f.READ, key)
+		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
 	
 	if err==OK:
-		data = f.get_as_text()
+		data = _test_file.get_as_text()
 	else:
 		prints("Couldn't read", path, "ErrorCode:", err)
 	
-	f.close()
+	_test_file.close()
 	return data
 
 
 func write_text(path:String, text:String, key:="")->int:
-	var f = File.new()
 	var err : int
 	if key == "":
-		err = f.open(path, f.WRITE)
+		err = _test_file.open(path, _test_file.WRITE)
 	else:
-		err = f.open_encrypted_with_pass(path, f.WRITE, key)
+		err = _test_file.open_encrypted_with_pass(path, _test_file.WRITE, key)
 	
 	if err==OK:
-		f.store_string(text)
+		_test_file.store_string(text)
 	else:
 		prints("Couldn't write", path, "ErrorCode:", err)
-	f.close()
+	
+	_test_file.close()
 	return err
 ###########################################
 
@@ -144,36 +143,35 @@ func write_text(path:String, text:String, key:="")->int:
 ## Any Variable
 ###############
 func read_variant(path:String, key:=""):
-	var f := File.new()
 	var data := ""
 	var err : int
 	if key == "":
-		err = f.open(path, f.READ)
+		err = _test_file.open(path, _test_file.READ)
 	else:
-		err = f.open_encrypted_with_pass(path, f.READ, key)
+		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
 	
 	if err==OK:
-		data = f.get_var(true)
+		data = _test_file.get_var(true)
 	else:
 		prints("Couldn't read", path, "ErrorCode:", err)
 	
+	_test_file.close()
 	return data
 
 
 func write_variant(path:String, value, key:="")->int:
-	var f := File.new()
 	var err : int
 	if key == "":
-		err = f.open(path, f.WRITE)
+		err = _test_file.open(path, _test_file.WRITE)
 	else:
-		err = f.open_encrypted_with_pass(path, f.WRITE, key)
+		err = _test_file.open_encrypted_with_pass(path, _test_file.WRITE, key)
 	
 	if err==OK:
-		f.store_var(value, true)
+		_test_file.store_var(value, true)
 	else:
 		prints("Couldn't write", path, "ErrorCode:", err)
 	
-	f.close()
+	_test_file.close()
 	return err
 ###########################################
 
@@ -181,58 +179,78 @@ func write_variant(path:String, value, key:="")->int:
 ## Binary
 #########
 func read_bytes(path:String, key:="")->PoolByteArray:
-	var f := File.new()
 	var data := PoolByteArray([])
 	var err : int
 	if key == "":
-		err = f.open(path, f.READ)
+		err = _test_file.open(path, _test_file.READ)
 	else:
-		err = f.open_encrypted_with_pass(path, f.READ, key)
+		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
 	
 	if err==OK:
-		data = f.get_buffer(f.get_len())
+		data = _test_file.get_buffer(_test_file.get_len())
 	else:
 		prints("Couldn't read", path, "ErrorCode:", err)
 	
+	_test_file.close()
 	return data
 
 
 func write_bytes(path:String, value:PoolByteArray, key:="")->int:
-	var f := File.new()
 	var err : int
 	if key == "":
-		err = f.open(path, f.WRITE)
+		err = _test_file.open(path, _test_file.WRITE)
 	else:
-		err = f.open_encrypted_with_pass(path, f.WRITE, key)
+		err = _test_file.open_encrypted_with_pass(path, _test_file.WRITE, key)
 	
 	if err==OK:
-		f.store_buffer(value)
+		_test_file.store_buffer(value)
 	else:
 		prints("Couldn't write", path, "ErrorCode:", err)
 	
-	f.close()
+	_test_file.close()
 	return err
 ###########################################
 
 
 ## CSV
 ######
-#func read_csv(path:String, key:="")->Array:
-#	var f := File.new()
-#	var data := []
-#	var err : int
-#	if key == "":
-#		err = f.open(path, f.READ)
-#	else:
-#		err = f.open_encrypted_with_pass(path, f.READ, key)
-#
-#	if err==OK:
-#		while f.get_len() > f.get_position():
-#			data.push_back(f.get_csv_line())
-#	else:
-#		prints("Couldn't read", path, "ErrorCode:", err)
-#
-#	return data
+func read_csv(path:String, key:="", custom_delimiter=",")->Array:
+	var data := []
+	var err : int
+	if key == "":
+		err = _test_file.open(path, _test_file.READ)
+	else:
+		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
+	
+	if err==OK:
+		while _test_file.get_len() > _test_file.get_position():
+			data.push_back(_test_file.get_csv_line(custom_delimiter))
+	else:
+		prints("Couldn't read", path, "ErrorCode:", err)
+	
+	_test_file.close()
+	return data
+
+
+func write_csv(path:String, value:Array, key:="", custom_delimiter=",")->int:
+	var err : int
+	
+	# validate value
+	if !value is Array: return ERR_INVALID_DATA
+	
+	if key == "":
+		err = _test_file.open(path, _test_file.READ)
+	else:
+		err = _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
+	
+	if err==OK:
+		for line in value:
+			_test_file.store_csv_line(PoolStringArray(line), custom_delimiter)
+	else:
+		prints("Couldn't write", path, "ErrorCode:", err)
+	
+	_test_file.close()
+	return err
 ###########################################
 
 
