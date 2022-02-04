@@ -1,0 +1,6 @@
+This Test Texts is a Test.
+The other Test files are just random data I had lying around in the project.
+The Json Test is a lookup table. It tells the automatic file load mode how to open what files.
+The Variant version is the same data but saved with Godots format. This has a few more features than json. 
+Namely that you can save whole nodes. I'm not sure how well that works but you can do it.
+The  binary file is just the first idk bytes of icon.png

@@ -1,0 +1,8 @@
+This Test Text is a Test., The Editor has a bug where it adds a, everytime you save a csv but I don't care enouth to go back and fix it because it is late and I want to go to sleep, just don't copy the csv editor part of this file viewer, I made it specifically to fit with the rest of the editors which is dumb,  , 
+The other Test,     files are just random data I had lying around in the project.,     ,    ,   ,  , 
+The Json Test is a lookup table. It tells the automatic file load mode how to open what files.,     ,    ,   ,  , 
+The Variant version is the same,     data but saved with Godots,     format. This has a few more features than json. ,     ,    ,   ,  , 
+Namely that you,     can save whole nodes. I'm not sure how well,     that works but you can do it.,     ,    ,   ,  , 
+The  binary file is just the first idk,     bytes of icon.png,     ,    ,   ,  , 
+For the,     csv I just,     put in a lot of ,   s,
+

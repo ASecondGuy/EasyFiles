@@ -34,15 +34,17 @@ var current_path := ""
 
 func _ready():
 	_file_monitor.EFNode = EF
-	_on_FileDialog_file_selected("res://addons/EasyFiles/test.txt")
+	_on_FileDialog_file_selected("res://addons/EasyFiles/exampleFiles/text.txt")
 	
 	var err = EF.connect("file_modified", self, "_file")
 	if err != OK: print("EasyFilesExample error: " + str(err))
 	
-	err = EF.add_file_monitor("res://addons/EasyFiles/test.txt")
+	err = EF.add_file_monitor("res://addons/EasyFiles/exampleFiles/text.txt")
 	if err != OK: print("EasyFilesExample error: " + str(err))
 	
 	update_control_panel()
+
+
 
 func _file(path):
 	prints("modified:", path)
