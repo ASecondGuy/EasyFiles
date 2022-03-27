@@ -9,7 +9,7 @@ signal file_modified(path)
 
 var _dir := Directory.new() setget _not_setter # protected var
 var _test_file := File.new() setget _not_setter # protected var
-var _file_moinitor_timer := Timer.new() setget _not_setter # protected var
+var _file_monitor_timer := Timer.new() setget _not_setter # protected var
 var _files_to_monitor := [] setget _not_setter # protected var
 var _files_last_modified := [] setget _not_setter # protected var
 
@@ -20,9 +20,9 @@ func _not_setter(__):
 
 func _ready():
 	# set up check file timer
-	add_child(_file_moinitor_timer)
-	_file_moinitor_timer.start(1)
-	_file_moinitor_timer.connect("timeout", self, "force_file_modification_check")
+	add_child(_file_monitor_timer)
+	_file_monitor_timer.start(1)
+	_file_monitor_timer.connect("timeout", self, "force_file_modification_check")
 
 
 
@@ -57,19 +57,19 @@ func get_monitored_files()->Array:
 
 
 func set_file_monitor_intervall(time:float=1)->void:
-	_file_moinitor_timer.start(time)
+	_file_monitor_timer.start(time)
 
 
 func get_file_monitor_intervall()->float:
-	return _file_moinitor_timer.wait_time
+	return _file_monitor_timer.wait_time
 
 
 func pause_file_monitoring()->void:
-	_file_moinitor_timer.paused = true
+	_file_monitor_timer.paused = true
 
 
 func resume_file_monitoring()->void:
-	_file_moinitor_timer.paused = false
+	_file_monitor_timer.paused = false
 ###########################################
 
 
