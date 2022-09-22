@@ -182,9 +182,6 @@ dialog_hide_on_ok = true
 mode = 3
 access = 2
 show_hidden_files = true
-current_dir = "/devRepos/EasyFiles"
-current_file = "test.txt"
-current_path = "/devRepos/EasyFiles/test.txt"
 
 [node name="FileDialog2" type="FileDialog" parent="."]
 margin_right = 1024.0

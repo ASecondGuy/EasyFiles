@@ -7,11 +7,11 @@ extends Node
 signal file_modified(path)
 
 
-var _dir := Directory.new() setget _not_setter # protected var
-var _test_file := File.new() setget _not_setter # protected var
-var _file_monitor_timer := Timer.new() setget _not_setter # protected var
-var _files_to_monitor := [] setget _not_setter # protected var
-var _files_last_modified := [] setget _not_setter # protected var
+var _dir : Directory = Directory.new() setget _not_setter # protected var
+var _test_file : File = File.new() setget _not_setter # protected var
+var _file_monitor_timer : Timer = Timer.new() setget _not_setter # protected var
+var _files_to_monitor : Array = [] setget _not_setter # protected var
+var _files_last_modified : Array = [] setget _not_setter # protected var
 
 
 func _not_setter(__):
@@ -136,13 +136,13 @@ func write_text(path:String, text:String, key:="", compression=-1)->int:
 
 ## Any Variable
 ###############
-func read_variant(path:String, key:="", compression=-1):
+func read_variant(path:String, key:="", compression=-1, allow_objects:= false):
 	var data
 	var err : int
 	err = _open_read(path, key, compression)
 	
 	if err==OK:
-		data = _test_file.get_var(true)
+		data = _test_file.get_var(allow_objects)
 	else:
 		prints("Couldn't read", path, "ErrorCode:", err)
 	
@@ -150,12 +150,12 @@ func read_variant(path:String, key:="", compression=-1):
 	return data
 
 
-func write_variant(path:String, value, key:="", compression=-1)->int:
+func write_variant(path:String, value, key:="", compression=-1, allow_objects:= false)->int:
 	var err : int
 	err = _open_write(path, key, compression)
 	
 	if err==OK:
-		_test_file.store_var(value, true)
+		_test_file.store_var(value, allow_objects)
 	else:
 		prints("Couldn't write", path, "ErrorCode:", err)
 	
@@ -248,8 +248,8 @@ func get_files_in_directory(path:String, recursive=false, filter:="*"):
 	
 	var dir := Directory.new()
 	if dir.open(path) == OK:
-		# warning-ignore:return_value_discarded
-		dir.list_dir_begin(true, true)
+		if dir.list_dir_begin(true, true) != OK:
+			return []
 		var file_name = dir.get_next()
 		while file_name != "":
 			if dir.current_is_dir():
