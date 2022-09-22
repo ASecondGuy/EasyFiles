@@ -248,8 +248,8 @@ func get_files_in_directory(path:String, recursive=false, filter:="*"):
 	
 	var dir := Directory.new()
 	if dir.open(path) == OK:
-		# warning-ignore:return_value_discarded
-		dir.list_dir_begin(true, true)
+		if dir.list_dir_begin(true, true) != OK:
+			return []
 		var file_name = dir.get_next()
 		while file_name != "":
 			if dir.current_is_dir():

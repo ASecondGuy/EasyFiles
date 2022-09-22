@@ -169,8 +169,8 @@ func _on_savebtn_pressed():
 
 func _text_to_bytes(text:String)->PoolByteArray:
 	var data := []
-	for i in range(0, text.length()-1, 2):
-		data.push_back(("0x"+text.substr(i, 1)).hex_to_int())
+	for i in range(text.length()-1):
+		data.push_back(ord(text[i]))
 	return PoolByteArray(data)
 
 
