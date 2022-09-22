@@ -7,11 +7,11 @@ extends Node
 signal file_modified(path)
 
 
-var _dir := Directory.new() setget _not_setter # protected var
-var _test_file := File.new() setget _not_setter # protected var
-var _file_monitor_timer := Timer.new() setget _not_setter # protected var
-var _files_to_monitor := [] setget _not_setter # protected var
-var _files_last_modified := [] setget _not_setter # protected var
+var _dir : Directory = Directory.new() setget _not_setter # protected var
+var _test_file : File = File.new() setget _not_setter # protected var
+var _file_monitor_timer : Timer = Timer.new() setget _not_setter # protected var
+var _files_to_monitor : Array = [] setget _not_setter # protected var
+var _files_last_modified : Array = [] setget _not_setter # protected var
 
 
 func _not_setter(__):
