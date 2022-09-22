@@ -136,13 +136,13 @@ func write_text(path:String, text:String, key:="", compression=-1)->int:
 
 ## Any Variable
 ###############
-func read_variant(path:String, key:="", compression=-1):
+func read_variant(path:String, key:="", compression=-1, allow_objects:= false):
 	var data
 	var err : int
 	err = _open_read(path, key, compression)
 	
 	if err==OK:
-		data = _test_file.get_var(true)
+		data = _test_file.get_var(allow_objects)
 	else:
 		prints("Couldn't read", path, "ErrorCode:", err)
 	
@@ -150,12 +150,12 @@ func read_variant(path:String, key:="", compression=-1):
 	return data
 
 
-func write_variant(path:String, value, key:="", compression=-1)->int:
+func write_variant(path:String, value, key:="", compression=-1, allow_objects:= false)->int:
 	var err : int
 	err = _open_write(path, key, compression)
 	
 	if err==OK:
-		_test_file.store_var(value, true)
+		_test_file.store_var(value, allow_objects)
 	else:
 		prints("Couldn't write", path, "ErrorCode:", err)
 	
