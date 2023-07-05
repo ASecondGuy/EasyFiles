@@ -1,18 +1,18 @@
 extends MarginContainer
 
-onready var EF := $EasyFilesNode
-onready var _file_dialog := $FileDialog
-onready var _choose_file_btn := $HBox/ControlPanel/chooseFileBtn
-onready var _file_format := $HBox/ControlPanel/FileSpecific/fileFormatSelector/OptionButton
-onready var _file_only := $HBox/ControlPanel/FileSpecific
-onready var _folder_only := $HBox/ControlPanel/Folderspecific
-onready var _out_edit := $HBox/TabContainer/Edit
-onready var _out_string := $HBox/TabContainer/String
-onready var _out_bin := $HBox/TabContainer/Bytes
-onready var _file_filter := $HBox/ControlPanel/Folderspecific/FileFilter/LineEdit
-onready var _file_monitor := $HBox/ControlPanel/FileMonitorDisplay
-onready var _search_recursive_btn := $HBox/ControlPanel/Folderspecific/CheckBox
-onready var _file_add_monitor_btn := $HBox/ControlPanel/FileSpecific/monitorbtn
+@onready var EF := $EasyFilesNode
+@onready var _file_dialog := $FileDialog
+@onready var _choose_file_btn := $HBox/ControlPanel/chooseFileBtn
+@onready var _file_format := $HBox/ControlPanel/FileSpecific/fileFormatSelector/OptionButton
+@onready var _file_only := $HBox/ControlPanel/FileSpecific
+@onready var _folder_only := $HBox/ControlPanel/Folderspecific
+@onready var _out_edit := $HBox/TabContainer/Edit
+@onready var _out_string := $HBox/TabContainer/String
+@onready var _out_bin := $HBox/TabContainer/Bytes
+@onready var _file_filter := $HBox/ControlPanel/Folderspecific/FileFilter/LineEdit
+@onready var _file_monitor := $HBox/ControlPanel/FileMonitorDisplay
+@onready var _search_recursive_btn := $HBox/ControlPanel/Folderspecific/CheckBox
+@onready var _file_add_monitor_btn := $HBox/ControlPanel/FileSpecific/monitorbtn
 #onready var 
 #onready var 
 
@@ -36,7 +36,7 @@ func _ready():
 	_file_monitor.EFNode = EF
 	_on_FileDialog_file_selected("res://addons/EasyFiles/exampleFiles/text.txt")
 	
-	var err = EF.connect("file_modified", self, "_file")
+	var err = EF.connect("file_modified", Callable(self, "_file"))
 	if err != OK: print("EasyFilesExample error: " + str(err))
 	
 	err = EF.add_file_monitor("res://addons/EasyFiles/exampleFiles/text.txt")
@@ -53,7 +53,10 @@ func _file(path):
 
 
 func _on_chooseFileBtn_pressed():
-	_file_dialog.popup_centered(OS.window_size*Vector2(.8, .7))
+	var pop_size := get_window().size
+	pop_size.x *= 0.8
+	pop_size.y *= 0.8
+	_file_dialog.popup_centered()
 
 
 func _on_FileDialog_file_selected(path:String):
@@ -107,17 +110,17 @@ func update_control_panel():
 			var data = EF.read_text(current_path)
 			_out_edit.text = data
 			_out_string.text = data
-			_out_bin.text = _text_to_bytes(data).hex_encode()
+			_out_bin.text = data.to_ascii_buffer().hex_encode()
 		2: # json
 			var data = EF.read_json(current_path)
 			_out_edit.text = str(data)
 			_out_string.text = str(data)
-			_out_bin.text = var2bytes(data).hex_encode()
+			_out_bin.text = var_to_bytes(data).hex_encode()
 		3: # var
-			var data = var2str(EF.read_variant(current_path))
+			var data = var_to_str(EF.read_variant(current_path))
 			_out_edit.text = data
 			_out_string.text = data
-			_out_bin.text = var2bytes(data).hex_encode()
+			_out_bin.text = var_to_bytes(data).hex_encode()
 		4: # bin
 			var data = EF.read_bytes(current_path)
 			_out_edit.text = data.hex_encode()
@@ -132,7 +135,7 @@ func update_control_panel():
 				string += "\n"
 			_out_edit.text = string
 			_out_string.text = str(data)
-			_out_bin.text = var2bytes(data).hex_encode()
+			_out_bin.text = var_to_bytes(data).hex_encode()
 	
 	
 
@@ -149,9 +152,9 @@ func _on_savebtn_pressed():
 		2: # json
 			EF.write_json(current_path, _out_edit.text)
 		3: # var
-			EF.write_variant(current_path, str2var(_out_edit.text))
+			EF.write_variant(current_path, str_to_var(_out_edit.text))
 		4: # bin
-			EF.write_bytes(current_path, _text_to_bytes(_out_edit.text))
+			EF.write_bytes(current_path, _out_edit.text.to_ascii_buffer())
 		5: # csv
 			var data := []
 			for line in _out_edit.text.split("\n"):
@@ -165,13 +168,6 @@ func _on_savebtn_pressed():
 	
 	update_control_panel()
 
-
-
-func _text_to_bytes(text:String)->PoolByteArray:
-	var data := []
-	for i in range(text.length()-1):
-		data.push_back(ord(text[i]))
-	return PoolByteArray(data)
 
 
 

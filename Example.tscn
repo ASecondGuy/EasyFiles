@@ -1,11 +1,11 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=6 format=3 uid="uid://b2suvq6rwbsk1"]
 
-[ext_resource path="res://addons/EasyFiles/EasyFiles.gd" type="Script" id=1]
-[ext_resource path="res://addons/EasyFiles/icons/Reload.svg" type="Texture" id=2]
-[ext_resource path="res://Example.gd" type="Script" id=3]
-[ext_resource path="res://FileMonitorDisplay.tscn" type="PackedScene" id=4]
+[ext_resource type="Script" path="res://addons/EasyFiles/EasyFiles.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://bou0o2ae5bwf1" path="res://addons/EasyFiles/icons/Reload.svg" id="2"]
+[ext_resource type="Script" path="res://Example.gd" id="3"]
+[ext_resource type="PackedScene" path="res://FileMonitorDisplay.tscn" id="4"]
 
-[sub_resource type="GDScript" id=2]
+[sub_resource type="GDScript" id="2"]
 script/source = "extends LineEdit
 
 
@@ -16,180 +16,110 @@ func _on_clearBtn_pressed():
 "
 
 [node name="Example" type="MarginContainer"]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+script = ExtResource("3")
 
 [node name="EasyFilesNode" type="Node" parent="."]
-script = ExtResource( 1 )
+script = ExtResource("1")
 
 [node name="HBox" type="HSplitContainer" parent="."]
-margin_right = 1024.0
-margin_bottom = 600.0
+layout_mode = 2
 
 [node name="ControlPanel" type="VBoxContainer" parent="HBox"]
-margin_right = 149.0
-margin_bottom = 600.0
+layout_mode = 2
 
 [node name="chooseFileBtn" type="Button" parent="HBox/ControlPanel"]
-margin_right = 149.0
-margin_bottom = 20.0
+layout_mode = 2
 
 [node name="reloadbtn" type="Button" parent="HBox/ControlPanel"]
-margin_left = 97.0
-margin_top = 24.0
-margin_right = 149.0
-margin_bottom = 44.0
+layout_mode = 2
 size_flags_horizontal = 8
 text = "reload"
 
 [node name="FileSpecific" type="VBoxContainer" parent="HBox/ControlPanel"]
-margin_top = 48.0
-margin_right = 149.0
-margin_bottom = 134.0
+layout_mode = 2
 
 [node name="Label" type="Label" parent="HBox/ControlPanel/FileSpecific"]
-margin_right = 149.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "File Options"
 
 [node name="fileFormatSelector" type="HBoxContainer" parent="HBox/ControlPanel/FileSpecific"]
-margin_top = 18.0
-margin_right = 149.0
-margin_bottom = 38.0
+layout_mode = 2
 
 [node name="Label" type="Label" parent="HBox/ControlPanel/FileSpecific/fileFormatSelector"]
-margin_top = 3.0
-margin_right = 80.0
-margin_bottom = 17.0
+layout_mode = 2
 text = "File Format: "
 
 [node name="OptionButton" type="OptionButton" parent="HBox/ControlPanel/FileSpecific/fileFormatSelector"]
-margin_left = 84.0
-margin_right = 143.0
-margin_bottom = 20.0
-text = "Auto"
-items = [ "Auto", null, false, 0, null, "Text", null, false, 1, null, "Json", null, false, 2, null, "Variable", null, false, 3, null, "Bytes", null, false, 4, null, "CSV", null, false, 5, null ]
-selected = 0
+layout_mode = 2
 
 [node name="savebtn" type="Button" parent="HBox/ControlPanel/FileSpecific"]
-margin_top = 42.0
-margin_right = 149.0
-margin_bottom = 62.0
+layout_mode = 2
 text = "Save"
 
 [node name="monitorbtn" type="Button" parent="HBox/ControlPanel/FileSpecific"]
-margin_top = 66.0
-margin_right = 149.0
-margin_bottom = 86.0
+layout_mode = 2
 text = "Add to file monitor"
 
 [node name="Folderspecific" type="VBoxContainer" parent="HBox/ControlPanel"]
-margin_top = 138.0
-margin_right = 149.0
-margin_bottom = 208.0
+layout_mode = 2
 
 [node name="Label" type="Label" parent="HBox/ControlPanel/Folderspecific"]
-margin_right = 149.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Folder Options"
 
 [node name="CheckBox" type="CheckBox" parent="HBox/ControlPanel/Folderspecific"]
-margin_top = 18.0
-margin_right = 149.0
-margin_bottom = 42.0
+layout_mode = 2
 text = "Find files recursive"
 
 [node name="FileFilter" type="HBoxContainer" parent="HBox/ControlPanel/Folderspecific"]
-margin_top = 46.0
-margin_right = 149.0
-margin_bottom = 70.0
+layout_mode = 2
 
 [node name="Label" type="Label" parent="HBox/ControlPanel/Folderspecific/FileFilter"]
-margin_top = 5.0
-margin_right = 61.0
-margin_bottom = 19.0
+layout_mode = 2
 text = "File filter:"
 
 [node name="clearBtn" type="TextureButton" parent="HBox/ControlPanel/Folderspecific/FileFilter"]
-margin_left = 65.0
-margin_top = 4.0
-margin_right = 81.0
-margin_bottom = 20.0
+layout_mode = 2
 size_flags_vertical = 4
-texture_normal = ExtResource( 2 )
+texture_normal = ExtResource("2")
 stretch_mode = 5
 
 [node name="LineEdit" type="LineEdit" parent="HBox/ControlPanel/Folderspecific/FileFilter"]
-margin_left = 85.0
-margin_right = 143.0
-margin_bottom = 24.0
+layout_mode = 2
 text = "*"
-script = SubResource( 2 )
+script = SubResource("2")
 
-[node name="FileMonitorDisplay" parent="HBox/ControlPanel" instance=ExtResource( 4 )]
-margin_top = 212.0
-margin_bottom = 378.0
+[node name="FileMonitorDisplay" parent="HBox/ControlPanel" instance=ExtResource("4")]
+layout_mode = 2
 file_dialog_path = NodePath("../../../FileDialog2")
 
 [node name="TabContainer" type="TabContainer" parent="HBox"]
-margin_left = 161.0
-margin_right = 1024.0
-margin_bottom = 600.0
+layout_mode = 2
 size_flags_horizontal = 3
-tab_align = 0
 
 [node name="Edit" type="TextEdit" parent="HBox/TabContainer"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+layout_mode = 2
 size_flags_horizontal = 3
-show_line_numbers = true
 draw_tabs = true
 
 [node name="String" type="RichTextLabel" parent="HBox/TabContainer"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+layout_mode = 2
 
 [node name="Bytes" type="RichTextLabel" parent="HBox/TabContainer"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+layout_mode = 2
 
 [node name="FileDialog" type="FileDialog" parent="."]
-margin_right = 355.0
-margin_bottom = 130.0
-size_flags_horizontal = 0
-size_flags_vertical = 0
-window_title = "Open a File or Directory"
-resizable = true
-dialog_hide_on_ok = true
 mode = 3
+dialog_hide_on_ok = true
 access = 2
 show_hidden_files = true
 
 [node name="FileDialog2" type="FileDialog" parent="."]
-margin_right = 1024.0
-margin_bottom = 600.0
-rect_min_size = Vector2( 500, 300 )
-window_title = "Open a File"
-resizable = true
-mode = 0
 show_hidden_files = true
 
 [connection signal="pressed" from="HBox/ControlPanel/chooseFileBtn" to="." method="_on_chooseFileBtn_pressed"]

@@ -6,12 +6,10 @@ extends Node
 
 signal file_modified(path)
 
-
-var _dir : Directory = Directory.new() setget _not_setter # protected var
-var _test_file : File = File.new() setget _not_setter # protected var
-var _file_monitor_timer : Timer = Timer.new() setget _not_setter # protected var
-var _files_to_monitor : Array = [] setget _not_setter # protected var
-var _files_last_modified : Array = [] setget _not_setter # protected var
+var _test_file
+var _file_monitor_timer : Timer = Timer.new(): set = _not_setter
+var _files_to_monitor : Array = []: set = _not_setter
+var _files_last_modified : Array = []: set = _not_setter
 
 
 func _not_setter(__):
@@ -22,7 +20,7 @@ func _ready():
 	# set up check file timer
 	add_child(_file_monitor_timer)
 	_file_monitor_timer.start(1)
-	_file_monitor_timer.connect("timeout", self, "force_file_modification_check")
+	_file_monitor_timer.connect("timeout", Callable(self, "force_file_modification_check"))
 
 
 
@@ -31,22 +29,22 @@ func _ready():
 func add_file_monitor(path:String)->int:
 	if _files_to_monitor.has(path): return ERR_ALREADY_EXISTS
 	# I don' know if relative paths will work but might as well allow them
-	if !(path.is_abs_path() or path.is_rel_path()): ERR_FILE_BAD_PATH
+	if !(path.is_absolute_path() or path.is_relative_path()): ERR_FILE_BAD_PATH
 	_files_to_monitor.push_back(path)
-	_files_last_modified.push_back(_test_file.get_modified_time(path))
+	_files_last_modified.push_back(FileAccess.get_modified_time(path))
 	return OK
 
 
 func remove_file_monitor(path:String)->int:
 	if !_files_to_monitor.has(path): return ERR_DOES_NOT_EXIST
-	_files_last_modified.remove(_files_to_monitor.find(path))
+	_files_last_modified.erase(_files_to_monitor.find(path))
 	_files_to_monitor.erase(path)
 	return OK
 
 
 func force_file_modification_check()->void:
 	for idx in range(_files_to_monitor.size()):
-		var mod_time := _test_file.get_modified_time(_files_to_monitor[idx])
+		var mod_time := FileAccess.get_modified_time(_files_to_monitor[idx])
 		if mod_time == _files_last_modified[idx]: continue
 		emit_signal("file_modified", _files_to_monitor[idx])
 		_files_last_modified[idx] = mod_time
@@ -76,31 +74,33 @@ func resume_file_monitoring()->void:
 ## general Folder operations
 ############################
 func copy_file(from:String, to:String)->int:
-	return _dir.copy(from, to)
+	return DirAccess.copy_absolute(from, to)
 
 func delete_file(path:String)->int:
-	return _dir.remove(path)
+	return DirAccess.remove_absolute(path)
 
 func create_folder(path:String)->int:
-	return _dir.make_dir_recursive(path)
+	return DirAccess.make_dir_recursive_absolute(path)
 
 func rename(from: String, to: String)->int:
-	return _dir.rename(from, to)
+	return DirAccess.rename_absolute(from, to)
 
 func path_exists(path:String)->bool:
 	if path.match("*.*"):
-		return _dir.file_exists(path)
-	return _dir.dir_exists(path)
+		return FileAccess.file_exists(path)
+	return DirAccess.dir_exists_absolute(path)
 ###########################################
 
 
 ## json
 #######
 func read_json(path:String, key:="", compression=-1):
-	return parse_json(read_text(path, key, compression))
+	var test_json_conv = JSON.new()
+	test_json_conv.parse(read_text(path, key, compression))
+	return test_json_conv.get_data()
 
 func write_json(path:String, data, key:="", compression=-1)->int:
-	return write_text(path, to_json(data), key, compression)
+	return write_text(path, JSON.new().stringify(data), key, compression)
 ###########################################
 
 
@@ -116,7 +116,8 @@ func read_text(path:String, key:="", compression=-1)->String:
 	else:
 		prints("Couldn't read", path, "ErrorCode:", err)
 	
-	_test_file.close()
+	if is_instance_valid(_test_file):
+		_test_file.close()
 	return data
 
 
@@ -166,13 +167,13 @@ func write_variant(path:String, value, key:="", compression=-1, allow_objects:= 
 
 ## Binary
 #########
-func read_bytes(path:String, key:="", compression=-1)->PoolByteArray:
-	var data := PoolByteArray([])
+func read_bytes(path:String, key:="", compression=-1)->PackedByteArray:
+	var data := PackedByteArray([])
 	var err : int
 	err = _open_read(path, key, compression)
 	
 	if err==OK:
-		data = _test_file.get_buffer(_test_file.get_len())
+		data = _test_file.get_buffer(_test_file.get_length())
 	else:
 		prints("Couldn't read", path, "ErrorCode:", err)
 	
@@ -180,7 +181,7 @@ func read_bytes(path:String, key:="", compression=-1)->PoolByteArray:
 	return data
 
 
-func write_bytes(path:String, value:PoolByteArray, key:="", compression:=-1)->int:
+func write_bytes(path:String, value:PackedByteArray, key:="", compression:=-1)->int:
 	var err : int
 	
 	err = _open_write(path, key, compression)
@@ -203,7 +204,7 @@ func read_csv(path:String, key:="", custom_delimiter=",", compression=-1)->Array
 	err = _open_read(path, key, compression)
 	
 	if err==OK:
-		while _test_file.get_len() > _test_file.get_position():
+		while _test_file.get_length() > _test_file.get_position():
 			data.push_back(_test_file.get_csv_line(custom_delimiter))
 	else:
 		prints("Couldn't read", path, "ErrorCode:", err)
@@ -218,11 +219,11 @@ func write_csv(path:String, value:Array, custom_delimiter=",", key:="", compress
 	# validate value
 	if !value is Array: return ERR_INVALID_DATA
 	for i in range(value.size()):
-		if value[i] is PoolStringArray: continue
+		if value[i] is PackedStringArray: continue
 		if value[i] is Array:
-			value[i] = PoolStringArray(value[i])
+			value[i] = PackedStringArray(value[i])
 			continue
-		value[i] = PoolStringArray()
+		value[i] = PackedStringArray()
 	
 	err = _open_write(path, key, compression)
 	
@@ -246,9 +247,11 @@ func get_files_in_directory(path:String, recursive=false, filter:="*"):
 	var dirs = []
 	if !path.ends_with("/"): path += "/"
 	
-	var dir := Directory.new()
-	if dir.open(path) == OK:
-		if dir.list_dir_begin(true, true) != OK:
+	var dir := DirAccess.open(path)
+	if DirAccess.get_open_error() == OK:
+		dir.include_hidden = false
+		dir.include_navigational = false
+		if dir.list_dir_begin()  != OK:
 			return []
 		var file_name = dir.get_next()
 		while file_name != "":
@@ -275,25 +278,33 @@ func get_files_in_directory(path:String, recursive=false, filter:="*"):
 ## Helper Functions
 
 func _open_read(path:String, key="", compression=-1)->int:
-	if _test_file.is_open(): return ERR_BUSY
+	if is_instance_valid(_test_file):
+		if _test_file.is_open(): return ERR_BUSY
 	if key != "":
-		return _test_file.open_encrypted_with_pass(path, _test_file.READ, key)
+		_test_file = FileAccess.open_encrypted_with_pass(path, FileAccess.READ, key)
+		return FileAccess.get_open_error()
 	elif compression != -1:
 		if compression < 0 or compression > 3: return ERR_INVALID_PARAMETER
-		return _test_file.open_compressed(path, _test_file.READ, compression)
+		_test_file = FileAccess.open_compressed(path, FileAccess.READ, compression)
+		return FileAccess.get_open_error()
 	else:
-		return _test_file.open(path, _test_file.READ)
+		_test_file = FileAccess.open(path, FileAccess.READ)
+		return FileAccess.get_open_error()
 
 
 func _open_write(path:String, key="", compression=-1)->int:
-	if _test_file.is_open(): return ERR_BUSY
+	if is_instance_valid(_test_file):
+		if _test_file.is_open(): return ERR_BUSY
 	if key != "":
-		return _test_file.open_encrypted_with_pass(path, _test_file.WRITE, key)
+		_test_file = FileAccess.open_encrypted_with_pass(path, FileAccess.WRITE, key)
+		return FileAccess.get_open_error()
 	elif compression != -1:
 		if compression < 0 or compression > 3: return ERR_INVALID_PARAMETER
-		return _test_file.open_compressed(path, _test_file.WRITE, compression)
+		_test_file = FileAccess.open_compressed(path, FileAccess.WRITE, compression)
+		return FileAccess.get_open_error()
 	else:
-		return _test_file.open(path, _test_file.WRITE)
+		_test_file = FileAccess.open(path, FileAccess.WRITE)
+		return FileAccess.get_open_error()
 ###########################################
 
 
