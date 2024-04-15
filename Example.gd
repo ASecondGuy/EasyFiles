@@ -26,6 +26,8 @@ const AUTO_FILEFORMAT_LOOKUP := {
 	"variable" : 3,
 	"save" : 3,
 	"bin" : 4,
+	"png": 4,
+	"jpg": 4,
 	"csv" : 5,
 }
 
@@ -36,11 +38,15 @@ func _ready():
 	_file_monitor.EFNode = EF
 	_on_FileDialog_file_selected("res://addons/EasyFiles/exampleFiles/text.txt")
 	
-	var err = EF.connect("file_modified", Callable(self, "_file"))
+	var err = EF.connect("file_modified", _file)
 	if err != OK: print("EasyFilesExample error: " + str(err))
 	
 	err = EF.add_file_monitor("res://addons/EasyFiles/exampleFiles/text.txt")
 	if err != OK: print("EasyFilesExample error: " + str(err))
+	
+	_file_format.add_item("auto", 0)
+	for key in AUTO_FILEFORMAT_LOOKUP:
+		_file_format.add_item(key)
 	
 	update_control_panel()
 
@@ -53,10 +59,7 @@ func _file(path):
 
 
 func _on_chooseFileBtn_pressed():
-	var pop_size := get_window().size
-	pop_size.x *= 0.8
-	pop_size.y *= 0.8
-	_file_dialog.popup_centered()
+	_file_dialog.popup_centered_ratio()
 
 
 func _on_FileDialog_file_selected(path:String):
@@ -101,7 +104,7 @@ func update_control_panel():
 	
 	_file_add_monitor_btn.text = ["Add to monitor", "Remove from monitor"][int(EF.get_monitored_files().has(current_path))]
 	
-	var mode : int = _file_format.selected
+	var mode : int = AUTO_FILEFORMAT_LOOKUP.get(_file_format.text, 0)
 	if mode == 0:
 		mode = AUTO_FILEFORMAT_LOOKUP.get(current_path.get_extension(), 0)
 	
@@ -121,7 +124,7 @@ func update_control_panel():
 			_out_edit.text = data
 			_out_string.text = data
 			_out_bin.text = var_to_bytes(data).hex_encode()
-		4: # bin
+		4, 0: # bin
 			var data = EF.read_bytes(current_path)
 			_out_edit.text = data.hex_encode()
 			_out_string.text = data.get_string_from_utf8()
@@ -136,13 +139,17 @@ func update_control_panel():
 			_out_edit.text = string
 			_out_string.text = str(data)
 			_out_bin.text = var_to_bytes(data).hex_encode()
+		_: # clear
+			_out_edit.clear()
+			_out_string.clear()
+			_out_bin.clear()
 	
 	
 
 
 func _on_savebtn_pressed():
 	if current_path.get_extension() == "": return
-	var mode : int = _file_format.selected
+	var mode : int = AUTO_FILEFORMAT_LOOKUP.get(_file_format.text, 0)
 	if mode == 0:
 		mode = AUTO_FILEFORMAT_LOOKUP.get(current_path.get_extension(), 0)
 	

@@ -52,6 +52,6 @@ func _on_add_pressed():
 		file_dialog.popup_centered(pop_size)
 
 func is_muted():
-	return _mutebtn.pressed
+	return _mutebtn.button_pressed
 
 

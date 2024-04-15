@@ -114,8 +114,11 @@ visible = false
 layout_mode = 2
 
 [node name="FileDialog" type="FileDialog" parent="."]
+title = "Open a File or Directory"
 mode = 3
+ok_button_text = "Open"
 dialog_hide_on_ok = true
+file_mode = 3
 access = 2
 show_hidden_files = true
 
