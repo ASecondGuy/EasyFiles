@@ -29,6 +29,7 @@ const AUTO_FILEFORMAT_LOOKUP := {
 	"png": 4,
 	"jpg": 4,
 	"csv" : 5,
+	"rsv": 6,
 }
 
 var current_path := ""
@@ -139,6 +140,16 @@ func update_control_panel():
 			_out_edit.text = string
 			_out_string.text = str(data)
 			_out_bin.text = var_to_bytes(data).hex_encode()
+		6: # rsv
+			var data = EF.read_rsv(current_path)
+			var string := ""
+			for line in data:
+				string += "|".join(line)
+				string += "\n"
+			string = string.trim_suffix("\n")
+			_out_edit.text = string
+			_out_string.text = str(data).replace(",", ",\n")
+			_out_bin.text = var_to_bytes(data).hex_encode()
 		_: # clear
 			_out_edit.clear()
 			_out_string.clear()
@@ -172,8 +183,17 @@ func _on_savebtn_pressed():
 					data.push_back([""])
 				
 			EF.write_csv(current_path, data)
+		6: # csv
+			var data := []
+			for line in _out_edit.text.split("\n"):
+				var l : Array = line.split("|")
+				if l.size() > 0:
+					data.push_back(l)
+				else:
+					data.push_back([""])
+			EF.write_rsv(current_path, data)
 	
-	update_control_panel()
+	update_control_panel.call_deferred()
 
 
 

@@ -239,6 +239,63 @@ func write_csv(path:String, value:Array, custom_delimiter=",", key:="", compress
 ###########################################
 
 
+## RSV
+######
+func read_rsv(path:String, key:="", compression=-1)->Array:
+	var bytes := read_bytes(path, key, compression)
+	var out := []
+	
+	var i := 0
+	var current_value := PackedByteArray()
+	var current_row := []
+	
+	while i < bytes.size():
+		var b := bytes[i]
+		if b == 0xFF:# End of value
+			if current_value.size() == 1 and current_value[0] == 0xFE:# Null value
+				current_row.push_back(null)
+			else:
+				current_row.push_back(current_value.get_string_from_utf8())
+			current_value.resize(0)
+		elif b == 0xFD:# End of Row
+			out.append(PackedStringArray(current_row))
+			current_row.clear()
+			current_value.resize(0)
+		else:
+			# append newest byte to the value
+			current_value.append(b)
+		i+=1
+	
+	return out
+
+
+func write_rsv(path:String, value:Array, key:="", compression=-1)->int:
+	# validate value
+	if !value is Array: return ERR_INVALID_DATA
+	for i in range(value.size()):
+		if value[i] is PackedStringArray: continue
+		if value[i] is Array:
+			value[i] = PackedStringArray(value[i])
+			continue
+		value[i] = PackedStringArray()
+	
+	var err := _open_write(path, key, compression)
+	
+	if err == OK:
+		for row in value:
+			for element in row:
+				if element == null:
+					# store null value
+					_test_file.store_8(0xFE)
+				elif element is String:
+					_test_file.store_buffer(element.to_utf8_buffer())
+				# End of value
+				_test_file.store_8(0xFF)
+			_test_file.store_8(0xFD)
+	
+	_test_file.close()
+	return err
+###########################################
 
 ## file search
 ##############

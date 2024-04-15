@@ -120,6 +120,7 @@ ok_button_text = "Open"
 dialog_hide_on_ok = true
 file_mode = 3
 access = 2
+root_subfolder = "addons/EasyFiles/exampleFiles"
 show_hidden_files = true
 
 [node name="FileDialog2" type="FileDialog" parent="."]
