@@ -7,7 +7,7 @@ It makes everything about files just a little bit easier.
 # How to use
 Easy Files is available as a autoload script or a Node. 
 ## Read & Write
-The Script has several functions to read & write text, json, variant (any variable), bytes (PoolByteArray) and csv.
+The Script has several functions to read & write text, json, variant (any variable), bytes (PackedByteArray), csv and rsv.
 All of them work the same so I'll just explain the text version.
 ### read
 [ERROR](https://docs.godotengine.org/en/stable/classes/class_%40globalscope.html#enum-globalscope-error) read_text([String](https://docs.godotengine.org/en/stable/classes/class_string.html) path, [String](https://docs.godotengine.org/en/stable/classes/class_string.html) key="", [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) compression=-1)
